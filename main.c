@@ -11,10 +11,12 @@ int main() {
 
   hp_player=initialisation();
   hp_moob=initialisation();
+  while (hp_moob>0) {
+    printf("life points: %d\n",hp_moob);
+    printf("Sword slash inflict %d life points to the monster.\n",dmg_sword);
+    hp_moob-=dmg_sword;
+    printf("life points: %d\n",hp_moob);
+  }
 
-  printf("life points: %d\n",hp_moob);
-  printf("Sword slash inflict %d life points to the monster.\n",dmg_sword);
-  hp_moob-=dmg_sword;
-  printf("life points: %d\n",hp_moob);
   return 0;
 }
