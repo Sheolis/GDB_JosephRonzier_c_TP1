@@ -8,14 +8,24 @@ int main() {
   int dmg_bite=12;
   int action_player;
   int action_moob;
+  int pm_player=5;
+  int pm_moob=5;
+  int status_player;
+  int status_moob;
   int i; int j; int k;
 
 
   while (hp_moob>0 && hp_player>0) {
-    action_moob=rand()%2;
+    if (pm-moob>=5) {
+      action_moob=rand()%3;
+    }
+    else {
+      action_moob=rand()%2;
+    }
     printf("Basilic life points: %d\n",hp_moob);
     printf("Your life points : %d\n",hp_player);
-    printf("Attack{1} or defend{0} ?\n");
+    printf("Your pm : %d\n",pm_player);
+    printf("Attack{1}, defend{0} or poison spell{2}(cost 5pm) ?\n");
     scanf("%d",&action_player);
     if (action_player==1){
       if (action_moob==0) {
@@ -27,7 +37,9 @@ int main() {
         printf("Sword slash inflict %d life points to the basilic.\n",dmg_sword);
         hp_moob-=dmg_sword;
       }
-
+    }
+    if (action_player==2){
+      if (pm_player>)
     }
     if(action_moob==1){
       if (action_player==0) {
