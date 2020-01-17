@@ -3,16 +3,15 @@
 #include <string.h>
 
 typedef enum action_type { POISON=2, ATTACK=1, DEFENSE=0 } action_type_t;
-
-typedef struct entity
-{
+typedef enum status_type { HEALTHY=1, POISONNED=2 } status_type_t;
+typedef struct entity {
   char* name;
   char* attack;
   int hp;
   int dmg;
   int pm;
   action_type_t action;
-  int status;
+  status_type_t status;
 } entity_t;
 
 
@@ -45,18 +44,22 @@ void attack(entity_t *assaillant, entity_t *target) {
       target->hp-=assaillant->dmg;
     }
   }
+  else if(assaillant->action==POISON) {
+    printf("%s poisons %s.\n",assaillant->name,target->name);
+    target->status=
+  }
 }
 
 void setup_player(entity_t *player) {
   char name[1024];
   printf("Entrez votre nom\n");
-  scanf("%[^\n]s",name);
+  scanf("%[^\n]s",name); //permet d'enregister tout jusqu'au premier \n, dont les espaces. Peut générer un crash si le joueur entre un nom plus gros que 1024 octets.
   player->name=strdup(name);
 }
 
 int main() {
-  entity_t player={"Player","sword slash",30, 8, 5, 0, 0};
-  entity_t mob={"Basilic","bite",30, 12, 5, 0, 0};
+  entity_t player={"Player","sword slash",30, 8, 5, 0, 1};
+  entity_t mob={"Basilic","bite",30, 12, 5, 0, 1};
   setup_player(&player);
   int i; int j; int k;
 
