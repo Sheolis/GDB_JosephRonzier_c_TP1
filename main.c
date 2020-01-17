@@ -1,56 +1,69 @@
 #include <stdio.h>
 #include <stdlib.h>
+#include <string.h>
+
+typedef enum action_type { POISON=2, ATTACK=1, DEFENSE=0 } action_type_t;
+
+typedef struct entity
+{
+  char* name;
+  char* attack;
+  int hp;
+  int dmg;
+  int pm;
+  action_type_t action;
+  int status;
+} entity_t;
+
+
+void round_start(entity_t *player, entity_t *mob) {
+  int round_step=1;
+  if (player->pm<5){ player->pm++; }
+  if (mob->pm<5) { mob->pm++; }
+  if (mob->pm>=5) { mob->action=rand()%3; }
+  else { mob->action=rand()%2; }
+  while(round_step==1){
+    printf("%s life points: %d\n", mob->name, mob->hp);
+    printf("Your life points : %d\n",player->hp);
+    printf("Your pm : %d\n",player->pm);
+    printf("Attack{1}, defend{0} or poison spell{2}(cost 5pm) ?\n");
+    scanf("%u",&(player->action));
+    if (player->action==POISON & player->pm<5){ printf("Not enough mana points to cast \"poison\"\n");  }
+    else { round_step=2; }
+  }
+}
+
+void attack(entity_t *assaillant, entity_t *target) {
+  if (assaillant->action==ATTACK) {
+    if (target->action==DEFENSE) {
+      printf("%s defends!\n",target->name);
+      printf("The attack %s inflict %d life points to %s.\n",assaillant->attack,assaillant->dmg/4,target->name);
+      target->hp-=assaillant->dmg/4;
+    }
+    else{
+      printf("The attack %s inflict %d life points to %s.\n",assaillant->attack,assaillant->dmg,target->name);
+      target->hp-=assaillant->dmg;
+    }
+  }
+}
+
+void setup_player(entity_t *player) {
+  char name[1024];
+  printf("Entrez votre nom\n");
+  scanf("%[^\n]s",name);
+  player->name=strdup(name);
+}
 
 int main() {
-  int hp_player=30;
-  int hp_moob=30;
-  int dmg_sword=8;
-  int dmg_bite=12;
-  int action_player;
-  int action_moob;
-  int pm_player=5;
-  int pm_moob=5;
-  int status_player;
-  int status_moob;
+  entity_t player={"Player","sword slash",30, 8, 5, 0, 0};
+  entity_t mob={"Basilic","bite",30, 12, 5, 0, 0};
+  setup_player(&player);
   int i; int j; int k;
 
-
-  while (hp_moob>0 && hp_player>0) {
-    if (pm-moob>=5) {
-      action_moob=rand()%3;
-    }
-    else {
-      action_moob=rand()%2;
-    }
-    printf("Basilic life points: %d\n",hp_moob);
-    printf("Your life points : %d\n",hp_player);
-    printf("Your pm : %d\n",pm_player);
-    printf("Attack{1}, defend{0} or poison spell{2}(cost 5pm) ?\n");
-    scanf("%d",&action_player);
-    if (action_player==1){
-      if (action_moob==0) {
-        printf("The basilic defends itself!\n");
-        printf("Sword slash inflict %d life points to the basilic.\n",dmg_sword/4);
-        hp_moob-=dmg_sword/4;
-      }
-      else{
-        printf("Sword slash inflict %d life points to the basilic.\n",dmg_sword);
-        hp_moob-=dmg_sword;
-      }
-    }
-    if (action_player==2){
-      if (pm_player>)
-    }
-    if(action_moob==1){
-      if (action_player==0) {
-        printf("The basilic bites you, inflicting %d life points\n",dmg_bite/4);
-        hp_player-=dmg_bite/4;
-      }
-      else {
-        printf("The basilic bites you, inflicting %d life points\n",dmg_bite);
-        hp_player-=dmg_bite;
-      }
-    }
+  while (mob.hp>0 && player.hp>0) {
+    round_start(&player,&mob);
+    attack(&player,&mob);
+    attack(&mob,&player);
   }
   return 0;
 }
