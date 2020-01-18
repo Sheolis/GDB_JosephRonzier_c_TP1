@@ -1,6 +1,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <time.h>
 
 typedef enum action_type { POISON=2, ATTACK=1, DEFENSE=0 } action_type_t;
 typedef enum status_type { HEALTHY=1, POISONNED=2 } status_type_t;
@@ -46,7 +47,14 @@ void attack(entity_t *assaillant, entity_t *target) {
   }
   else if(assaillant->action==POISON) {
     printf("%s poisons %s.\n",assaillant->name,target->name);
-    target->status=
+    target->status=2;
+  }
+}
+
+void status_resume(entity_t *entity) {
+  if (entity->status==2) {
+    entity->hp-=1;
+    printf("%s is poisonned and lost 1 hp\n",entity->name);
   }
 }
 
@@ -57,7 +65,27 @@ void setup_player(entity_t *player) {
   player->name=strdup(name);
 }
 
+/*void dessin() {
+  printf("                           \    /                         \n
+                          ( o  o )                        \n
+                            v  v                  / \     \n
+                           (     )                | |     \n
+                            (     )               | |     \n
+                            (      )              | |     \n
+                      ()    (      )              | |     \n
+                       ()  (       )              | |     \n
+       /\              ( )(        )              | |     \n
+       \ \             ( (          )             | |     \n
+       /\ \   |\      ( (            )            | |     \n
+       \ \ \__| |      (              )      ( )---O---( )\n
+       |\       |                              |      _|  \n
+        \       |                               \     |   \n
+          \      \                              /   __|   \n
+            \                                             \n");
+}*/
+
 int main() {
+  srand(time(NULL));
   entity_t player={"Player","sword slash",30, 8, 5, 0, 1};
   entity_t mob={"Basilic","bite",30, 12, 5, 0, 1};
   setup_player(&player);
@@ -67,6 +95,7 @@ int main() {
     round_start(&player,&mob);
     attack(&player,&mob);
     attack(&mob,&player);
+    status_resume(&mob);
   }
   return 0;
 }
