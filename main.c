@@ -15,11 +15,20 @@ typedef struct entity {
   status_type_t status;
 } entity_t;
 
+// Dmande du nom
+void setup_player(entity_t *player) {
+  char name[1024];
+  printf("Entrez votre nom\n");
+  scanf("%[^\n]s",name); //permet d'enregister tout jusqu'au premier \n, dont les espaces. Peut générer un crash si le joueur entre un nom plus gros que 1024 octets.
+  player->name=strdup(name);
+}
 
+//Initialisation du round
 void round_start(entity_t *player, entity_t *mob) {
+  printf(\n"<<<<<<<<<<<<<< NEW ROUND >>>>>>>>>>>>>>>\n\n");
   int round_step=1;
   if (player->pm<5){ player->pm++; }
-  if (mob->pm<5) { mob->pm++; }
+  //if (mob->pm<5) { mob->pm++; } //On peut ajouter cette ligne si on veut que le monstre régénère des pm
   if (mob->pm>=5) { mob->action=rand()%3; }
   else { mob->action=rand()%2; }
   while(round_step==1){
@@ -33,11 +42,13 @@ void round_start(entity_t *player, entity_t *mob) {
   }
 }
 
+//Resolution de l'attaque d'une entitée sur une autre
 void attack(entity_t *assaillant, entity_t *target) {
+  printf("-------------- %s --------------\n\n", assaillant->name);
   if (assaillant->action==ATTACK) {
     if (target->action==DEFENSE) {
       printf("%s defends!\n",target->name);
-      printf("The attack %s inflict %d life points to %s.\n",assaillant->attack,assaillant->dmg/4,target->name);
+      printf("%s use %s and inflict %d life points to %s.\n",assaillant->name,assaillant->attack,assaillant->dmg/4,target->name);
       target->hp-=assaillant->dmg/4;
     }
     else{
@@ -51,6 +62,7 @@ void attack(entity_t *assaillant, entity_t *target) {
   }
 }
 
+//Resolutions spéciales en fonction du statut de l'entitée
 void status_resume(entity_t *entity) {
   if (entity->status==2) {
     entity->hp-=1;
@@ -58,12 +70,6 @@ void status_resume(entity_t *entity) {
   }
 }
 
-void setup_player(entity_t *player) {
-  char name[1024];
-  printf("Entrez votre nom\n");
-  scanf("%[^\n]s",name); //permet d'enregister tout jusqu'au premier \n, dont les espaces. Peut générer un crash si le joueur entre un nom plus gros que 1024 octets.
-  player->name=strdup(name);
-}
 
 /*void dessin() {
   printf("                           \    /                         \n
@@ -84,16 +90,18 @@ void setup_player(entity_t *player) {
             \                                             \n");
 }*/
 
+// MAIN
 int main() {
   srand(time(NULL));
-  entity_t player={"Player","sword slash",30, 8, 5, 0, 1};
-  entity_t mob={"Basilic","bite",30, 12, 5, 0, 1};
+  entity_t player={"Player","SWORD SLASH",30, 8, 5, 0, 1};
+  entity_t mob={"Basilic","BITE",30, 12, 5, 0, 1};
   setup_player(&player);
   int i; int j; int k;
 
   while (mob.hp>0 && player.hp>0) {
     round_start(&player,&mob);
     attack(&player,&mob);
+    status_resume(&player);
     attack(&mob,&player);
     status_resume(&mob);
   }
