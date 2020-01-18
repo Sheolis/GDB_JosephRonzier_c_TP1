@@ -8,14 +8,19 @@ typedef enum status_type { HEALTHY=1, POISONNED=2 } status_type_t;
 typedef struct entity {
   char* name;
   char* attack;
+  int hp_max;
+  int pm_max;
   int hp;
-  int dmg;
   int pm;
+  int dmg;
   action_type_t action;
   status_type_t status;
 } entity_t;
 
+<<<<<<< HEAD
 // Dmande du nom
+=======
+>>>>>>> master
 void setup_player(entity_t *player) {
   char name[1024];
   printf("Entrez votre nom\n");
@@ -35,7 +40,7 @@ void round_start(entity_t *player, entity_t *mob) {
     printf("%s life points: %d\n", mob->name, mob->hp);
     printf("Your life points : %d\n",player->hp);
     printf("Your pm : %d\n",player->pm);
-    printf("Attack{1}, defend{0} or poison spell{2}(cost 5pm) ?\n");
+    printf("{1}Attack,{0}defend or {2}poison-spell(cost 5pm) ?\n");
     scanf("%u",&(player->action));
     if (player->action==POISON & player->pm<5){ printf("Not enough mana points to cast \"poison\"\n");  }
     else { round_step=2; }
@@ -59,6 +64,7 @@ void attack(entity_t *assaillant, entity_t *target) {
   else if(assaillant->action==POISON) {
     printf("%s poisons %s.\n",assaillant->name,target->name);
     target->status=2;
+    assaillant->pm-=5;
   }
 }
 
@@ -68,8 +74,15 @@ void status_resume(entity_t *entity) {
     entity->hp-=1;
     printf("%s is poisonned and lost 1 hp\n",entity->name);
   }
+  if (entity->pm<entity->pm_max) {
+    entity->pm++;
+  }
 }
 
+<<<<<<< HEAD
+=======
+
+>>>>>>> master
 
 /*void dessin() {
   printf("                           \    /                         \n
@@ -93,8 +106,13 @@ void status_resume(entity_t *entity) {
 // MAIN
 int main() {
   srand(time(NULL));
+<<<<<<< HEAD
   entity_t player={"Player","SWORD SLASH",30, 8, 5, 0, 1};
   entity_t mob={"Basilic","BITE",30, 12, 5, 0, 1};
+=======
+  entity_t player={"Player","sword slash",30, 5, 30, 5, 12, 0, 1};
+  entity_t mob={"Basilic","bite", 20, 5, 20, 5, 5, 0, 1};
+>>>>>>> master
   setup_player(&player);
   int i; int j; int k;
 
