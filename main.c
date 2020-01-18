@@ -3,8 +3,8 @@
 #include <string.h>
 #include <time.h>
 
-typedef enum action_type { POISON=2, ATTACK=1, DEFENSE=0 } action_type_t;
-typedef enum status_type { HEALTHY=1, POISONNED=2 } status_type_t;
+typedef enum action_type { ANTIDOTE=3, POISON=2, ATTACK=1, DEFENSE=0 } action_type_t;
+typedef enum status_type { DEAD=0, HEALTHY=1, POISONNED=2 } status_type_t;
 typedef struct entity {
   char* name;
   char* attack;
@@ -37,7 +37,7 @@ void round_start(entity_t *player, entity_t *mob) {
     printf("%s life points: %d\n", mob->name, mob->hp);
     printf("Your life points : %d\n",player->hp);
     printf("Your pm : %d\n",player->pm);
-    printf("{1}Attack,{0}defend or {2}poison-spell(cost 5pm) ?\n");
+    printf("{1}Attack,{0}defend, {2}poison-spell(cost 5pm) or {3}Antidote(cost 3pm) ?\n");
     scanf("%u",&(player->action));
     if (player->action==POISON & player->pm<5){ printf("Not enough mana points to cast \"poison\"\n");  }
     else { round_step=2; }
@@ -50,7 +50,7 @@ void attack(entity_t *assaillant, entity_t *target) {
   printf("-------------- %s --------------\n", assaillant->name);
   if (assaillant->action==ATTACK) {
     if (target->action==DEFENSE) {
-      printf("%s defends!\n",target->name);
+      printf("%s DEFENDS!\n",target->name);
       printf("%s use %s and inflict %d life points to %s.\n",assaillant->name,assaillant->attack,assaillant->dmg/4,target->name);
       target->hp-=assaillant->dmg/4;
     }
@@ -60,18 +60,29 @@ void attack(entity_t *assaillant, entity_t *target) {
     }
   }
   else if(assaillant->action==POISON) {
-    printf("%s poisons %s.\n",assaillant->name,target->name);
+    printf("%s POISONS %s.\n",assaillant->name,target->name);
     target->status=2;
     assaillant->pm-=5;
   }
+  else if(assaillant->action==ANTIDOTE) {
+    printf("%s use ANTIDOTE\n",assaillant->name);
+    printf("%s is no longer poisonned\n",assaillant->name);
+    assaillant->status=1;
+  }
   printf("\n");
+  if(target->hp<=0) {
+    target->status=0;
+  }
 }
 
 //Resolutions spéciales en fonction du statut de l'entitée
 void status_resume(entity_t *entity) {
-  if (entity->status==2) {
+  if (entity->status==POISONNED) {
     entity->hp-=1;
     printf("%s is poisonned and lost 1 hp\n",entity->name);
+  }
+  if (entity->status==DEAD) {
+    printf("%s dies.\n",entity->name);
   }
 }
 
