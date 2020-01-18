@@ -17,6 +17,7 @@ typedef struct entity {
   status_type_t status;
 } entity_t;
 
+// Dmande du nom
 void setup_player(entity_t *player) {
   char name[1024];
   printf("Entrez votre nom\n");
@@ -24,10 +25,12 @@ void setup_player(entity_t *player) {
   player->name=strdup(name);
 }
 
+//Initialisation du round
 void round_start(entity_t *player, entity_t *mob) {
+  printf("\n<<<<<<<<<<<<<< NEW ROUND >>>>>>>>>>>>>>>\n\n");
   int round_step=1;
-  if (player->pm<5){ player->pm++; }
-  if (mob->pm<5) { mob->pm++; }
+  if (player->pm<player->pm_max){ player->pm++; }
+  //if (mob->pm<5) { mob->pm++; } //On peut ajouter cette ligne si on veut que le monstre régénère des pm
   if (mob->pm>=5) { mob->action=rand()%3; }
   else { mob->action=rand()%2; }
   while(round_step==1){
@@ -39,13 +42,16 @@ void round_start(entity_t *player, entity_t *mob) {
     if (player->action==POISON & player->pm<5){ printf("Not enough mana points to cast \"poison\"\n");  }
     else { round_step=2; }
   }
+  printf("\n");
 }
 
+//Resolution de l'attaque d'une entitée sur une autre
 void attack(entity_t *assaillant, entity_t *target) {
+  printf("-------------- %s --------------\n", assaillant->name);
   if (assaillant->action==ATTACK) {
     if (target->action==DEFENSE) {
       printf("%s defends!\n",target->name);
-      printf("The attack %s inflict %d life points to %s.\n",assaillant->attack,assaillant->dmg/4,target->name);
+      printf("%s use %s and inflict %d life points to %s.\n",assaillant->name,assaillant->attack,assaillant->dmg/4,target->name);
       target->hp-=assaillant->dmg/4;
     }
     else{
@@ -58,18 +64,16 @@ void attack(entity_t *assaillant, entity_t *target) {
     target->status=2;
     assaillant->pm-=5;
   }
+  printf("\n");
 }
 
+//Resolutions spéciales en fonction du statut de l'entitée
 void status_resume(entity_t *entity) {
   if (entity->status==2) {
     entity->hp-=1;
     printf("%s is poisonned and lost 1 hp\n",entity->name);
   }
-  if (entity->pm<entity->pm_max) {
-    entity->pm++;
-  }
 }
-
 
 
 /*void dessin() {
@@ -91,10 +95,11 @@ void status_resume(entity_t *entity) {
             \                                             \n");
 }*/
 
+// MAIN
 int main() {
   srand(time(NULL));
-  entity_t player={"Player","sword slash",30, 5, 30, 5, 12, 0, 1};
-  entity_t mob={"Basilic","bite", 20, 5, 20, 5, 5, 0, 1};
+  entity_t player={"Player","SWORD SLASH",30, 5, 30, 5, 12, 0, 1};
+  entity_t mob={"Basilic","BITE", 20, 5, 20, 5, 5, 0, 1};
   setup_player(&player);
   int i; int j; int k;
 
@@ -103,6 +108,7 @@ int main() {
     attack(&player,&mob);
     attack(&mob,&player);
     status_resume(&mob);
+    status_resume(&player);
   }
   return 0;
 }
