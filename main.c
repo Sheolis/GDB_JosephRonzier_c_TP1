@@ -17,6 +17,12 @@ typedef struct entity {
   status_type_t status;
 } entity_t;
 
+//Fonction pour actualiser l'affichage dans la console
+void clrscreen()
+{
+    system("@cls||clear");
+}
+
 // Dmande du nom
 void setup_player(entity_t *player) {
   char name[1024];
@@ -40,7 +46,7 @@ void round_start(entity_t *player, entity_t *mob) {
     printf("{1}Attack,{0}defend, {2}poison-spell(cost 5pm) or {3}Antidote(cost 3pm) ?\n");
     scanf("%u",&(player->action));
     if (player->action==POISON & player->pm<5){ printf("Not enough mana points to cast \"poison\"\n");  }
-    else { round_step=2; }
+    else { round_step=2; clrscreen();}
   }
   printf("\n");
 }
@@ -67,6 +73,7 @@ void attack(entity_t *assaillant, entity_t *target) {
   else if(assaillant->action==ANTIDOTE) {
     printf("%s use ANTIDOTE\n",assaillant->name);
     printf("%s is no longer poisonned\n",assaillant->name);
+    assaillant->pm-=3;
     assaillant->status=1;
   }
   printf("\n");
@@ -85,6 +92,8 @@ void status_resume(entity_t *entity) {
     printf("%s dies.\n",entity->name);
   }
 }
+
+
 
 
 /*void dessin() {
