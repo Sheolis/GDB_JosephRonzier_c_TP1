@@ -23,12 +23,18 @@ void clrscreen()
     system("@cls||clear");
 }
 
+void dessin() {
+  printf("                           \\    /                         \n                          ( o  o )                        \n                            v  v                  / \\     \n                           (     )                | |     \n                            (     )               | |     \n                            (      )              | |     \n                      ()    (      )              | |     \n                       ()  (       )              | |     \n       /\\              ( )(        )              | |     \n       \\ \\             ( (          )             | |     \n       /\\ \\   |\\      ( (            )            | |     \n       \\ \\ \\__| |      (              )      ( )---O---( )\n       |\\       |                              |      _|  \n        \\       |                               \\     |   \n          \\      \\                              /   __|   \n            \\                                             \n");
+}
 // Dmande du nom
 void setup_player(entity_t *player) {
+  clrscreen();
   char name[1024];
   printf("Entrez votre nom\n");
   scanf("%[^\n]s",name); //permet d'enregister tout jusqu'au premier \n, dont les espaces. Peut générer un crash si le joueur entre un nom plus gros que 1024 octets.
   player->name=strdup(name);
+  clrscreen();
+  dessin();
 }
 
 //Initialisation du round
@@ -39,13 +45,14 @@ void round_start(entity_t *player, entity_t *mob) {
   //if (mob->pm<5) { mob->pm++; } //On peut ajouter cette ligne si on veut que le monstre régénère des pm
   if (mob->pm>=5) { mob->action=rand()%3; }
   else { mob->action=rand()%2; }
+  printf("%s life points: %d\n", mob->name, mob->hp);
+  printf("Your life points : %d\n",player->hp);
+  printf("Your pm : %d\n",player->pm);
   while(round_step==1){
-    printf("%s life points: %d\n", mob->name, mob->hp);
-    printf("Your life points : %d\n",player->hp);
-    printf("Your pm : %d\n",player->pm);
     printf("{1}Attack,{0}defend, {2}poison-spell(cost 5pm) or {3}Antidote(cost 3pm) ?\n");
     scanf("%u",&(player->action));
     if (player->action==POISON & player->pm<5){ printf("Not enough mana points to cast \"poison\"\n");  }
+    else if (player->action==ANTIDOTE & player->pm<3){ printf("Not enough mana points to cast \"antidote\"\n");  }
     else { round_step=2; clrscreen();}
   }
   printf("\n");
@@ -95,26 +102,6 @@ void status_resume(entity_t *entity) {
 
 
 
-
-/*void dessin() {
-  printf("                           \    /                         \n
-                          ( o  o )                        \n
-                            v  v                  / \     \n
-                           (     )                | |     \n
-                            (     )               | |     \n
-                            (      )              | |     \n
-                      ()    (      )              | |     \n
-                       ()  (       )              | |     \n
-       /\              ( )(        )              | |     \n
-       \ \             ( (          )             | |     \n
-       /\ \   |\      ( (            )            | |     \n
-       \ \ \__| |      (              )      ( )---O---( )\n
-       |\       |                              |      _|  \n
-        \       |                               \     |   \n
-          \      \                              /   __|   \n
-            \                                             \n");
-}*/
-
 // MAIN
 int main() {
   srand(time(NULL));
@@ -124,7 +111,8 @@ int main() {
   int i; int j; int k;
 
   while (mob.hp>0 && player.hp>0) {
-    round_start(&player,&mob);
+    round_start(&player,&mob); //screen cleared after that line
+    dessin();
     attack(&player,&mob);
     attack(&mob,&player);
     status_resume(&mob);
