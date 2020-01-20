@@ -15,6 +15,7 @@ typedef struct entity {
   int dmg;
   action_type_t action;
   status_type_t status;
+  spell_s spell;
 } entity_t;
 
 
@@ -113,8 +114,9 @@ void status_resume(entity_t *entity) {
 // MAIN
 int main() {
   srand(time(NULL));
+  spell_s soin={0,0,5,3}; 
   entity_t player={"Player","SWORD SLASH",30, 5, 30, 5, 12, 0, 1};
-  entity_t healer={"Healer","HEALING",20, 5, 20, 5, 0, 0, 1};
+  entity_t healer={"Healer","HEALING",20, 5, 20, 5, 0, 0, 1, soin};
   entity_t mob={"Orc","BITE", 20, 5, 20, 5, 5, 0, 1};
   setup_player(&player);
   int i; int j; int k;
