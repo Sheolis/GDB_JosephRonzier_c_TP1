@@ -13,6 +13,7 @@ typedef struct entity {
   int hp;
   int pm;
   int dmg;
+  int target;
   action_type_t action;
   status_type_t status;
 } entity_t;
@@ -38,22 +39,25 @@ void setup_player(entity_t *player) {
 }
 
 //Initialisation du round
-void round_start(entity_t *player, entity_t *mob) {
-  printf("\n<<<<<<<<<<<<<< NEW ROUND >>>>>>>>>>>>>>>\n\n");
-  int round_step=1;
-  if (player->pm<player->pm_max){ player->pm++; }
+void round_start_ia(entity_t *mob, int targets) {
   //if (mob->pm<5) { mob->pm++; } //On peut ajouter cette ligne si on veut que le monstre régénère des pm
   if (mob->pm>=5) { mob->action=rand()%3; }
   else { mob->action=rand()%2; }
   printf("%s life points: %d\n", mob->name, mob->hp);
-  printf("Your life points : %d\n",player->hp);
-  printf("Your pm : %d\n",player->pm);
+  printf("\n");
+}
+
+void round_start_character(entity_t *character) {
+  printf("\n<<<<<<<<<<<<<< NEW ROUND >>>>>>>>>>>>>>>\n\n");
+  int round_step=1;
+  if (character->pm<character->pm_max){ character->pm++; }
+  printf("%s life points: %d\n", character->name, character->hp);
+  printf("%s pm : %d\n",character->name, character->pm);
   while(round_step==1){
     printf("{1}Attack,{0}defend, {2}poison-spell(cost 5pm) or {3}Antidote(cost 3pm) ?\n");
-    scanf("%u",&(player->action));
-    if (player->action==POISON & player->pm<5){ printf("Not enough mana points to cast \"poison\"\n");  }
-    else if (player->action==ANTIDOTE & player->pm<3){ printf("Not enough mana points to cast \"antidote\"\n");  }
-    else { round_step=2; clrscreen();}
+    scanf("%u",&(character->action));
+    if (character->action==POISON & character->pm<5){ printf("Not enough mana points to cast \"poison\"\n");  }
+    else if (character->action==ANTIDOTE & character->pm<3){ printf("Not enough mana points to cast \"antidote\"\n");  }
   }
   printf("\n");
 }
@@ -105,13 +109,17 @@ void status_resume(entity_t *entity) {
 // MAIN
 int main() {
   srand(time(NULL));
-  entity_t player={"Player","SWORD SLASH",30, 5, 30, 5, 12, 0, 1};
-  entity_t mob={"Orc","BITE", 20, 5, 20, 5, 5, 0, 1};
+  entity_t player={"Player","SWORD SLASH",30, 5, 30, 5, 12, 1, 0, 1};
+  entity_t mob={"Orc","BITE", 20, 5, 20, 5, 5, 1, 0, 1};
   setup_player(&player);
+  int nb_players;
+  int nb_monsters;
   int i; int j; int k;
 
   while (mob.hp>0 && player.hp>0) {
-    round_start(&player,&mob); //screen cleared after that line
+    printf("\n<<<<<<<<<<<<<< NEW ROUND >>>>>>>>>>>>>>>\n\n");
+    round_start_ia(&mob);
+    round_start_character(&player); //screen cleared after that line
     dessin();
     attack(&player,&mob);
     attack(&mob,&player);
