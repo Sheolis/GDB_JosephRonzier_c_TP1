@@ -17,6 +17,14 @@ typedef struct entity {
   status_type_t status;
 } entity_t;
 
+
+typedef struct spell {
+  int def;
+  int dmg;
+  int hp;
+  int cost_pm;
+} spell_s;
+
 //Fonction pour actualiser l'affichage dans la console
 void clrscreen()
 {
@@ -106,6 +114,7 @@ void status_resume(entity_t *entity) {
 int main() {
   srand(time(NULL));
   entity_t player={"Player","SWORD SLASH",30, 5, 30, 5, 12, 0, 1};
+  entity_t healer={"Healer","HEALING",20, 5, 20, 5, 0, 0, 1};
   entity_t mob={"Orc","BITE", 20, 5, 20, 5, 5, 0, 1};
   setup_player(&player);
   int i; int j; int k;
