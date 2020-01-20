@@ -3,8 +3,9 @@
 #include <string.h>
 #include <time.h>
 
-typedef enum action_type { ANTIDOTE=3, POISON=2, ATTACK=1, DEFENSE=0 } action_type_t;
-typedef enum status_type { DEAD=0, HEALTHY=1, POISONNED=2 } status_type_t;
+typedef enum action_type { ANTIDOTE=3, POISON=2, ATTACK=1, DEFENSE=0 } action_type_e;
+typedef enum choice { OPEN=1, DRINK=3, NORTH=8, SOUTH=2, EAST=6, WEST=4 } choice_e;
+typedef enum status_type { DEAD=0, HEALTHY=1, POISONNED=2 } status_type_e;
 typedef struct entity {
   char* name;
   char* attack;
@@ -13,9 +14,20 @@ typedef struct entity {
   int hp;
   int pm;
   int dmg;
-  action_type_t action;
-  status_type_t status;
-} entity_t;
+  action_type_e action;
+  status_type_e status;
+} entity_s;
+typedef struct chest {
+  char* name;
+  int golds;
+  char* item;
+  int health_pot;
+} chest_s;
+typedef struct potion {
+  char* name;
+  int hp_regen;
+  int pm_regen;
+} potion_s;
 
 //Fonction pour actualiser l'affichage dans la console
 void clrscreen()
@@ -27,7 +39,7 @@ void dessin() {
   printf("                           \\    /                         \n                          ( o  o )                        \n                            v  v                  / \\     \n                           (     )                | |     \n                            (     )               | |     \n                            (      )              | |     \n                      ()    (      )              | |     \n                       ()  (       )              | |     \n       /\\              ( )(        )              | |     \n       \\ \\             ( (          )             | |     \n       /\\ \\   |\\      ( (            )            | |     \n       \\ \\ \\__| |      (              )      ( )---O---( )\n       |\\       |                              |      _|  \n        \\       |                               \\     |   \n          \\      \\                              /   __|   \n            \\                                             \n");
 }
 // Dmande du nom
-void setup_player(entity_t *player) {
+void setup_player(entity_s *player) {
   clrscreen();
   char name[1024];
   printf("Entrez votre nom\n");
@@ -38,7 +50,7 @@ void setup_player(entity_t *player) {
 }
 
 //Initialisation du round
-void round_start(entity_t *player, entity_t *mob) {
+void round_start(entity_s *player, entity_s *mob) {
   printf("\n<<<<<<<<<<<<<< NEW ROUND >>>>>>>>>>>>>>>\n\n");
   int round_step=1;
   if (player->pm<player->pm_max){ player->pm++; }
@@ -49,7 +61,7 @@ void round_start(entity_t *player, entity_t *mob) {
   printf("Your life points : %d\n",player->hp);
   printf("Your pm : %d\n",player->pm);
   while(round_step==1){
-    printf("{1}Attack,{0}defend, {2}poison-spell(cost 5pm) or {3}Antidote(cost 3pm) ?\n");
+    printf("{1}Attack\n{0}defend\n{2}poison-spell(cost 5pm)\n{3}Antidote(cost 3pm) ?\n");
     scanf("%u",&(player->action));
     if (player->action==POISON & player->pm<5){ printf("Not enough mana points to cast \"poison\"\n");  }
     else if (player->action==ANTIDOTE & player->pm<3){ printf("Not enough mana points to cast \"antidote\"\n");  }
@@ -59,7 +71,7 @@ void round_start(entity_t *player, entity_t *mob) {
 }
 
 //Resolution de l'attaque d'une entitée sur une autre
-void attack(entity_t *assaillant, entity_t *target) {
+void attack(entity_s *assaillant, entity_s *target) {
   printf("-------------- %s --------------\n", assaillant->name);
   if (assaillant->action==ATTACK) {
     if (target->action==DEFENSE) {
@@ -90,7 +102,7 @@ void attack(entity_t *assaillant, entity_t *target) {
 }
 
 //Resolutions spéciales en fonction du statut de l'entitée
-void status_resume(entity_t *entity) {
+void status_resume(entity_s *entity) {
   if (entity->status==POISONNED) {
     entity->hp-=1;
     printf("%s is poisonned and lost 1 hp\n",entity->name);
@@ -100,13 +112,40 @@ void status_resume(entity_t *entity) {
   }
 }
 
+void game_over_check(entity_s *entity) {
+  if (entity->hp<=0) {
+    printf("Game Over");
+    exit(0);
+  }
+}
+
+void drink_potion(entity_s *drinker,potion_s *potion){
+  drinker->hp+=potion->hp_regen;
+  drinker->pm+=potion->pm_regen;
+  if (drinker->pm>drinker->pm_max) {drinker->pm=drinker->pm_max;}
+  if (drinker->hp>drinker->hp_max) {drinker->hp=drinker->hp_max;}
+  printf("%s feels regenerated\n%s hp = %d\n%s pm = %d\n",drinker->name,drinker->name,drinker->hp,drinker->name,drinker->pm);
+}
+
+void intersection(entity_s *entity, int north, int south, int west, int east) {
+  printf("{1}Drink a potion\n{3}search around\n\n");
+  if (north==1) { printf("           {8}go North\n");}
+  if (west==1) { printf("\n {4}go West           ");} else { printf("\n                      ");}
+  if (east==1) { printf("{6}go East\n\n");} else { printf("\n\n");}
+  if (south==1) { printf("           {2}go South\n\n");}
+  choice_e choice;
+  scanf("%d",choice);
+  potion_s regen_pot = {"regen_pot", 2, 2};
+  if (choice==1) { drink_potion(entity, &regen_pot);}
+}
+
 
 
 // MAIN
 int main() {
   srand(time(NULL));
-  entity_t player={"Player","SWORD SLASH",30, 5, 30, 5, 12, 0, 1};
-  entity_t mob={"Basilic","BITE", 20, 5, 20, 5, 5, 0, 1};
+  entity_s player={"Player","SWORD SLASH",30, 5, 30, 5, 12, 0, 1};
+  entity_s mob={"Basilic","BITE", 20, 5, 20, 5, 5, 0, 1};
   setup_player(&player);
   int i; int j; int k;
 
@@ -117,6 +156,8 @@ int main() {
     attack(&mob,&player);
     status_resume(&mob);
     status_resume(&player);
+    game_over_check(&player);
   }
+  intersection(&player,1,1,1,1);
   return 0;
 }
