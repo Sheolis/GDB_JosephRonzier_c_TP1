@@ -26,6 +26,8 @@ typedef struct spell {
   int cost_pm;
 } spell_s;
 
+
+
 //Fonction pour actualiser l'affichage dans la console
 void clrscreen()
 {
@@ -114,9 +116,13 @@ void status_resume(entity_t *entity) {
 // MAIN
 int main() {
   srand(time(NULL));
-  spell_s soin={0,0,5,3}; 
+  spell_s soin={0, 0, 5, 3}; 
+  spell_s strike={0, 2, 0, 3};
+  spell_s shield={2, 0, 0, 3};
   entity_t player={"Player","SWORD SLASH",30, 5, 30, 5, 12, 0, 1};
   entity_t healer={"Healer","HEALING",20, 5, 20, 5, 0, 0, 1, soin};
+  entity_t warrior={"Warrior","STAGGERING STRIKE",20, 5, 20, 5, 5, 0, 1, strike};
+  entity_t templar={"Templar","SHIELD WALL",25, 5, 25, 5, 3, 0, 1, shield};
   entity_t mob={"Orc","BITE", 20, 5, 20, 5, 5, 0, 1};
   setup_player(&player);
   int i; int j; int k;
