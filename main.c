@@ -16,7 +16,20 @@ typedef struct entity {
   int target;
   action_type_t action;
   status_type_t status;
+  spell_s spell;
+  int def_init;
+  int def;
 } entity_t;
+
+
+typedef struct spell {
+  int def;
+  int dmg;
+  int hp;
+  int cost_pm;
+} spell_s;
+
+
 
 //Fonction pour actualiser l'affichage dans la console
 void clrscreen()
@@ -73,14 +86,10 @@ void attack(entity_t *assaillant, entity_t *target) {
   printf("-------------- %s --------------\n", assaillant->name);
   if (assaillant->action==ATTACK) {
     if (target->action==DEFENSE) {
-      printf("%s DEFENDS!\n",target->name);
-      printf("%s use %s and inflict %d life points to %s.\n",assaillant->name,assaillant->attack,assaillant->dmg/4,target->name);
-      target->hp-=assaillant->dmg/4;
-    }
-    else{
-      printf("The attack %s inflict %d life points to %s.\n",assaillant->attack,assaillant->dmg,target->name);
-      target->hp-=assaillant->dmg;
-    }
+        printf("%s DEFENDS!\n",target->name);
+      }
+    printf("%s use %s and inflict %d life points to %s.\n",assaillant->name,assaillant->attack,assaillant->dmg/target->def,target->name);
+    target->hp-=assaillant->dmg/target->def;
   }
   else if(assaillant->action==POISON) {
     printf("%s POISONS %s.\n",assaillant->name,target->name);
@@ -108,6 +117,7 @@ void status_resume(entity_t *entity) {
   if (entity->status==DEAD) {
     printf("%s dies.\n",entity->name);
   }
+  entity->def=entity->def;
 }
 
 
@@ -115,8 +125,14 @@ void status_resume(entity_t *entity) {
 // MAIN
 int main() {
   srand(time(NULL));
-  entity_t player={"Player","SWORD SLASH",30, 5, 30, 5, 12, 1, 0, 1};
-  entity_t mob={"Orc","BITE", 20, 5, 20, 5, 5, 1, 0, 1};
+  spell_s soin={0, 0, 5, 3};
+  spell_s strike={0, 2, 0, 3};
+  spell_s shield={2, 0, 0, 3};
+  entity_t player={"Player","SWORD SLASH",30, 5, 30, 5, 12, 0, 1,1};
+  entity_t healer={"Healer","HEALING",20, 5, 20, 5, 0, 0, 1, soin,1};
+  entity_t warrior={"Warrior","STAGGERING STRIKE",20, 5, 20, 5, 5, 0, 1, strike,1};
+  entity_t templar={"Templar","SHIELD WALL",25, 5, 25, 5, 3, 0, 1, shield,1};
+  entity_t mob={"Orc","BITE", 20, 5, 20, 5, 5, 0, 1, NULL,1};
   setup_player(&player);
   int nb_players;
   int nb_monsters;
