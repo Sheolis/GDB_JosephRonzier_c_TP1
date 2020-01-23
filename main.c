@@ -43,6 +43,9 @@ void round_start_ia(entity_t *mob, int targets) {
   //if (mob->pm<5) { mob->pm++; } //On peut ajouter cette ligne si on veut que le monstre régénère des pm
   if (mob->pm>=5) { mob->action=rand()%3; }
   else { mob->action=rand()%2; }
+  if (mob->action==DEFENSE) {
+    mob->def+=4;
+  }
   printf("%s life points: %d\n", mob->name, mob->hp);
   printf("\n");
 }
@@ -58,6 +61,9 @@ void round_start_character(entity_t *character) {
     scanf("%u",&(character->action));
     if (character->action==POISON & character->pm<5){ printf("Not enough mana points to cast \"poison\"\n");  }
     else if (character->action==ANTIDOTE & character->pm<3){ printf("Not enough mana points to cast \"antidote\"\n");  }
+  }
+  if (character->action==DEFENSE) {
+    character->def+=4;
   }
   printf("\n");
 }
