@@ -117,7 +117,7 @@ void status_resume(entity_t *entity) {
   if (entity->status==DEAD) {
     printf("%s dies.\n",entity->name);
   }
-  entity->def=entity->def;
+  entity->def=entity->def_init;
 }
 
 
