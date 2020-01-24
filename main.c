@@ -124,7 +124,7 @@ void spell(entity_t *healer, entity_t *warrior, entity_t *templar, entity_t *pla
 
  if (templar->shield) {
    templar->pm-=3;
-   player->def-=2;
+   player->def+=2;
     printf("%s use SHIELD WALL and defends %s!\n",templar->name,player->name);   
  }
 }
