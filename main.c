@@ -108,6 +108,27 @@ void attack(entity_t *assaillant, entity_t *target) {
   }
 }
 
+//Resolution du spell des alliés vers une entitée
+void spell(entity_t *healer, entity_t *warrior, entity_t *templar, entity_t *player, entity_t *mob) {
+ if (healer->soin) {
+    healer->pm-=3;
+    player->hp+=5;
+     printf("%s use HEALING and heal %s.\n",healer->name,player->name);
+  }
+
+ if (warrior->strike) {
+    warrior->pm-=3;
+    mob->hp-=2; 
+     printf("%s use STAGERRING STRIKE and inflict 2 of damage to %s.\n",warrior->name,mob->name);
+ }
+
+ if (templar->shield) {
+   templar->pm-=3;
+   player->def-=2;
+    printf("%s use SHIELD WALL and defends %s!\n",templar->name,player->name);   
+ }
+}
+
 //Resolutions spéciales en fonction du statut de l'entitée
 void status_resume(entity_t *entity) {
   if (entity->status==POISONNED) {
@@ -132,7 +153,7 @@ int main() {
   entity_t healer={"Healer","HEALING",20, 5, 20, 5, 0, 0, 1, soin,1};
   entity_t warrior={"Warrior","STAGGERING STRIKE",20, 5, 20, 5, 5, 0, 1, strike,1};
   entity_t templar={"Templar","SHIELD WALL",25, 5, 25, 5, 3, 0, 1, shield,1};
-  entity_t mob={"Orc","BITE", 20, 5, 20, 5, 5, 0, 1, NULL,1};
+  entity_t mob={"Basilisk","BITE", 20, 5, 20, 5, 5, 0, 1, NULL,1};
   setup_player(&player);
   int nb_players;
   int nb_monsters;
