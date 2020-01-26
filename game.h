@@ -8,12 +8,14 @@ typedef struct team team_s;
 typedef struct spell spell_s;
 
 void setup_player(entity_s *player);
-void round_start_ia(entity_s *mob, team_s *opponents);
+int round_start_ia(entity_s *mob, team_s *opponents);
 void choice_target (entity_s *character,team_s *targetted_team);
-void round_start_character(entity_s *character, team_s *allies, team_s *ennemies);
-void attack(entity_s *assaillant, entity_s *target);
+int round_start_character(entity_s *character, team_s *allies, team_s *ennemies);
+int attack(entity_s *assaillant, entity_s *target);
 void status_resume(entity_s *entity);
 void add_to_team(team_s *team, entity_s *member);
+int victory_check(team_s *allies, team_s *opponents);
+
 struct spell {
   int def;
   int dmg;

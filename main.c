@@ -29,8 +29,12 @@ void setup_player(entity_s *player)
 }
 
 //Initialisation du round
-void round_start_ia(entity_s *mob, team_s *opponents)
+int round_start_ia(entity_s *mob, team_s *opponents)
 {
+  if (mob->status==0){
+    printf("%s life points: dead\n",mob->name);
+    return -1;
+  }
   if (mob->pm<mob->pm_max) { mob->pm++; } //On peut ajouter cette ligne si on veut que le monstre régénère des pm
   if (mob->pm>=5) { mob->action=rand()%3; }
   else { mob->action=rand()%2; }
@@ -46,8 +50,12 @@ void choice_target (entity_s *character,team_s *targetted_team)
   character->target=targetted_team->members[i-1];
 }
 
-void round_start_character(entity_s *character, team_s *allies, team_s *ennemies)
+int round_start_character(entity_s *character, team_s *allies, team_s *ennemies)
 {
+  if (character->status==0){
+    printf("%s is dead and can't play anymore",character->name);
+    return -1;
+  }
   int targetted_team=0;
   int round_step=1;
   if (character->pm<character->pm_max){ character->pm++; }
@@ -67,11 +75,21 @@ void round_start_character(entity_s *character, team_s *allies, team_s *ennemies
       scanf("%d",&targetted_team);
       if (targetted_team==0) {
         choice_target(character, allies);
-        round_step++;
+        if (character->target->status==0) {
+          printf("This target is already dead, you need to choose another one");
+        }
+        else{
+          round_step++;
+        }
       }
       else if (targetted_team==1) {
         choice_target(character, ennemies);
-        round_step++;
+        if (character->target->status==0) {
+          printf("This target is already dead, you need to choose another one");
+        }
+        else{
+          round_step++;
+        }
       }
       else{
         printf(">!>!>!Wrong input!<!<!<\n");
@@ -82,8 +100,16 @@ void round_start_character(entity_s *character, team_s *allies, team_s *ennemies
 }
 
 //Resolution de l'attaque d'une entitée sur une autre
-void attack(entity_s *assaillant, entity_s *target)
+int attack(entity_s *assaillant, entity_s *target)
 {
+  if (assaillant->status==0){
+    printf("%s lie dead",assaillant->name);
+    return -1;
+  }
+  if (target->status==0){
+    printf("The target \"%s\" is already dead.",assaillant->name);
+    return -1;
+  }
   printf("-------------- %s --------------\n", assaillant->name);
   if (assaillant->action==ATTACK) {
     if (target->action==DEFENSE) {
@@ -133,6 +159,30 @@ void add_to_team(team_s *team, entity_s *member)
   team->size++;
 }
 
+int victory_check(team_s *allies, team_s *opponents)
+{
+  int v_check=0;
+  for (int i = 0; i < 4; i++) {
+    if (allies->members[i]->status==0) {
+      v_check++;
+    }
+  }
+  if (v_check==4) {
+      printf("You have been defeated by the %s\n",opponents->name);
+      return 1;
+  }
+  v_check=0;
+  for (int i = 0; i < 4; i++) {
+    if (opponents->members[i]->status==0) {
+      v_check++;
+    }
+  }
+  if (v_check==4) {
+      printf("Victory, the %s is defeated !\n",opponents->name);
+      return 1;
+  }
+  return 0;
+}
 
 
 // MAIN
@@ -154,27 +204,28 @@ int main() {
   add_to_team(&allies,&player); add_to_team(&allies,&healer); add_to_team(&allies,&warrior); add_to_team(&allies,&templar);
   add_to_team(&opponents,&chief); add_to_team(&opponents,&orc); add_to_team(&opponents,&gob); add_to_team(&opponents,&squig);
   setup_player(&player);
-  int i; int j; int k;
 
-  while (chief.hp>0 && player.hp>0) {
+  while (victory_check(&allies, &opponents)==0) {
     printf("\n<<<<<<<<<<<<<< NEW ROUND >>>>>>>>>>>>>>>\n\n");
     round_start_ia(&chief,&allies);
     round_start_ia(&orc,&allies);
     round_start_ia(&gob,&allies);
     round_start_ia(&squig,&allies);
-      printf("\n");
+    printf("\n");
     round_start_character(&player,&allies,&opponents); //screen cleared after that line
     round_start_character(&healer,&allies,&opponents);
     round_start_character(&warrior,&allies,&opponents);
     round_start_character(&templar,&allies,&opponents);
-    attack(&player,player.target);
-    attack(&healer,healer.target);
-    attack(&warrior,warrior.target);
-    attack(&templar,templar.target);
-    attack(&chief,chief.target);
-    attack(&orc,orc.target);
-    attack(&gob,gob.target);
-    attack(&squig,squig.target);
+    for (int i = 0; i < 4; i++) {
+      if (allies.members[i]->status!=0) {
+        attack(allies.members[i],allies.members[i]->target);
+      }
+    }
+    for (int i = 0; i < 4; i++) {
+      if (opponents.members[i]->status!=0) {
+        attack(opponents.members[i],opponents.members[i]->target);
+      }
+    }
     printf("----------Status resolution----------\n");
     status_resume(&player);
     status_resume(&healer);
