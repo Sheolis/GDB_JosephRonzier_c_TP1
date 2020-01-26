@@ -1,4 +1,4 @@
-#ifndef __GAME_H_
+#ifndef __GAME_H_ //permet d'éviter un appel multiple du dossier game.h
 #define __GAME_H_
 
 typedef enum action_type { ANTIDOTE=4, CAST=3, DEFENSE=2, ATTACK=1} action_type_e;
@@ -17,37 +17,38 @@ void add_to_team(team_s *team, entity_s *member);
 int victory_check(team_s *allies, team_s *opponents);
 void spell(entity_s *caster, entity_s *target);
 
-struct spell {
-  int def;
-  int dmg;
-  int hp;
-  int cost_pm;
-  int status_modif;
-  char *name;
+struct spell
+{
+    int def;
+    int dmg;
+    int hp;
+    int cost_pm;
+    int status_modif;
+    char *name;
 };
 
-struct entity {
-  char* name;
-  char* attack;
-  int hp_max;
-  int hp;
-  int pm_max;
-  int pm;
-  int dmg;
-  entity_s *target;
-  action_type_e action;
-  status_type_e status;
-  spell_s *spell;
-  int def_init;
-  int def;
+struct entity
+{
+    char* name;
+    char* attack;
+    int hp_max;
+    int hp;
+    int pm_max;
+    int pm;
+    int dmg;
+    entity_s *target;
+    action_type_e action;
+    status_type_e status;
+    spell_s *spell;
+    int def_init;
+    int def;
 };
 
-
-
-struct team {
-  char* name;
-  int size;
-  entity_s **members;
+struct team
+{
+    char* name;
+    int size;
+    entity_s **members;
 };
 
 #endif /* end of include guard: __GAME_H_ */
