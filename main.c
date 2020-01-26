@@ -109,23 +109,23 @@ void attack(entity_t *assaillant, entity_t *target) {
 }
 
 //Resolution du spell des alliés vers une entitée
-void spell(entity_t *healer, entity_t *warrior, entity_t *templar, entity_t *player, entity_t *mob) {
- if (healer->soin) {
-    healer->pm-=3;
-    player->hp+=5;
-     printf("%s use HEALING and heal %s.\n",healer->name,player->name);
-  }
+void spell(entity_t *caster, entity_t *target) {
+ target->def+=caster->spell->def;
+ target->hp+=caster->spell->dmg;
+ target->hp+=caster->spell->hp;
+}
+
 
  if (warrior->strike) {
     warrior->pm-=3;
-    mob->hp-=2; 
+    mob->hp-=2;
      printf("%s use STAGERRING STRIKE and inflict 2 of damage to %s.\n",warrior->name,mob->name);
  }
 
  if (templar->shield) {
    templar->pm-=3;
    player->def+=2;
-    printf("%s use SHIELD WALL and defends %s!\n",templar->name,player->name);   
+    printf("%s use SHIELD WALL and defends %s!\n",templar->name,player->name);
  }
 }
 
