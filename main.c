@@ -36,7 +36,9 @@ int round_start_ia(entity_s *mob, team_s *opponents)
     return -1;
   }
   if (mob->pm<mob->pm_max) { mob->pm++; } //On peut ajouter cette ligne si on veut que le monstre régénère des pm
-  if (mob->pm>=5) { mob->action=rand()%3; }
+  if (mob->spell!=NULL){
+    if (mob->pm>=mob->spell->cost_pm) { mob->action=rand()%3; }
+  }
   else { mob->action=rand()%2; }
   mob->target=opponents->members[rand()%4];
   printf("%s life points: %d\n", mob->name, mob->hp);
@@ -62,10 +64,9 @@ int round_start_character(entity_s *character, team_s *allies, team_s *ennemies)
   printf("%s life points: %d\n", character->name, character->hp);
   printf("%s pm : %d\n",character->name, character->pm);
   while(round_step==1){
-    printf("{1}Attack,{0}defend, {2}poison-spell(cost 5pm) or {3}Antidote(cost 3pm) ?\n");
+    printf("{1}Attack,{0}defend or {3}Antidote(cost 3pm) ?\n");
     scanf("%u",&(character->action));
-    if (character->action==POISON & character->pm<5){ printf("Not enough mana points to cast \"poison\"\n");  }
-    else if (character->action==ANTIDOTE & character->pm<3){ printf("Not enough mana points to cast \"antidote\"\n");  }
+    if (character->action==ANTIDOTE & character->pm<3){ printf("Not enough mana points to cast \"antidote\"\n");  }
     else { round_step++;}
   }
   if (character->action!=DEFENSE){
@@ -121,11 +122,6 @@ int attack(entity_s *assaillant, entity_s *target)
   else if (assaillant->action==DEFENSE) {
     assaillant->def+=4;
     printf("%s DEFENDS!\n",assaillant->name);
-  }
-  else if(assaillant->action==POISON) {
-    printf("%s POISONS %s.\n",assaillant->name,target->name);
-    target->status=2;
-    assaillant->pm-=5;
   }
   else if(assaillant->action==ANTIDOTE) {
     printf("%s use ANTIDOTE\n",assaillant->name);
@@ -188,14 +184,15 @@ int victory_check(team_s *allies, team_s *opponents)
 // MAIN
 int main() {
   srand(time(NULL));
-  spell_s soin={0, 0, 5, 3};
-  spell_s strike={0, 2, 0, 3};
-  spell_s shield={2, 0, 0, 3};
-  entity_s player= {"Player","SWORD SLASH",30, 5, 30, 5, 12, 0, 0, 1, NULL, 1, 1};
+  spell_s poison={0, 0, 0, 5, 2};
+  spell_s soin={0, 0, 5, 3, -1};
+  spell_s strike={0, 2, 0, 3, -1};
+  spell_s shield={2, 0, 0, 3, -1};
+  entity_s player= {"Player","SWORD SLASH",30, 5, 30, 5, 12, 0, 0, 1, &poison, 1, 1};
   entity_s healer= {"Healer","HEALING",20, 5, 20, 5, 0, 0, 0, 1, &soin, 1, 1};
   entity_s warrior={"Warrior","STAGGERING STRIKE",20, 5, 20, 5, 5, 0, 0, 1, &strike, 1, 1};
   entity_s templar={"Templar","SHIELD WALL",25, 5, 25, 5, 3, 0, 0, 1, &shield, 1, 1};
-  entity_s chief=  {"Chief Superior Orc Smallthumbdunnowhich","DEADLY PUNCH", 20, 5, 20, 5, 5, 0, 0, 1, NULL, 1, 1};
+  entity_s chief=  {"Chief Superior Orc Smallthumbdunnowhich","DEADLY PUNCH", 20, 5, 20, 5, 5, 0, 0, 1, &poison, 1, 1};
   entity_s orc=    {"Bored Orc","BEARLY STADING AXE STROKE", 20, 5, 20, 5, 5, 0, 0, 1, NULL, 1, 1};
   entity_s gob=    {"Toothless Gobelin","SNEAKY HIT", 20, 5, 20, 5, 5, 0, 0, 1, NULL, 1, 1};
   entity_s squig=  {"Slightly angry Squig","BITE", 20, 5, 20, 5, 5, 0, 0, 1, NULL, 1, 1};

@@ -1,7 +1,7 @@
 #ifndef __GAME_H_
 #define __GAME_H_
 
-typedef enum action_type { ANTIDOTE=3, POISON=2, ATTACK=1, DEFENSE=0 } action_type_e;
+typedef enum action_type { ANTIDOTE=3, ATTACK=1, DEFENSE=0 } action_type_e;
 typedef enum status_type { DEAD=0, HEALTHY=1, POISONNED=2 } status_type_e;
 typedef struct entity entity_s;
 typedef struct team team_s;
@@ -21,6 +21,7 @@ struct spell {
   int dmg;
   int hp;
   int cost_pm;
+  int status_modif;
 };
 
 struct entity {
