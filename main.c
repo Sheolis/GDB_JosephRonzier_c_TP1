@@ -31,7 +31,7 @@ void setup_player(entity_s *player)
 //Initialisation du round
 int round_start_ia(entity_s *mob, team_s *opponents)
 {
-  if (mob->status==0){
+  if (mob->status==DEAD){
     printf("%s life points: dead\n",mob->name);
     return -1;
   }
@@ -54,8 +54,8 @@ void choice_target (entity_s *character,team_s *targetted_team)
 
 int round_start_character(entity_s *character, team_s *allies, team_s *ennemies)
 {
-  if (character->status==0){
-    printf("%s is dead and can't play anymore",character->name);
+  if (character->status==DEAD){
+    printf("%s is dead and can't play anymore\n",character->name);
     return -1;
   }
   int targetted_team=0;
@@ -64,7 +64,7 @@ int round_start_character(entity_s *character, team_s *allies, team_s *ennemies)
   printf("%s life points: %d\n", character->name, character->hp);
   printf("%s pm : %d\n",character->name, character->pm);
   while(round_step==1){
-    printf("{1}Attack,{0}defend or {3}Antidote(cost 3pm) ?\n");
+    printf("[1]Attack [2]Defend [3]%s spell (cost %d) [4]Antidote(cost 3pm) ?\n",character->spell->name,character->spell->cost_pm);
     scanf("%u",&(character->action));
     if (character->action==ANTIDOTE & character->pm<3){ printf("Not enough mana points to cast \"antidote\"\n");  }
     else { round_step++;}
@@ -76,8 +76,8 @@ int round_start_character(entity_s *character, team_s *allies, team_s *ennemies)
       scanf("%d",&targetted_team);
       if (targetted_team==0) {
         choice_target(character, allies);
-        if (character->target->status==0) {
-          printf("This target is already dead, you need to choose another one");
+        if (character->target->status==DEAD) {
+          printf("This target is already dead, you need to choose another one\n");
         }
         else{
           round_step++;
@@ -85,8 +85,8 @@ int round_start_character(entity_s *character, team_s *allies, team_s *ennemies)
       }
       else if (targetted_team==1) {
         choice_target(character, ennemies);
-        if (character->target->status==0) {
-          printf("This target is already dead, you need to choose another one");
+        if (character->target->status==DEAD) {
+          printf("This target is already dead, you need to choose another one\n");
         }
         else{
           round_step++;
@@ -97,18 +97,21 @@ int round_start_character(entity_s *character, team_s *allies, team_s *ennemies)
       }
     }
   }
+  else {
+    character->target=character; // Permet d'éviter d'appeler plus tard la fonction attaque avec un target=NULL
+  }
   printf("\n");
 }
 
 //Resolution de l'attaque d'une entitée sur une autre
 int attack(entity_s *assaillant, entity_s *target)
 {
-  if (assaillant->status==0){
-    printf("%s lie dead",assaillant->name);
+  if (assaillant->status==DEAD){
+    printf("%s lie dead\n",assaillant->name);
     return -1;
   }
-  if (target->status==0){
-    printf("The target \"%s\" is already dead.",assaillant->name);
+  if (target->status==DEAD){
+    printf("The target \"%s\" is already dead.\n",assaillant->name);
     return -1;
   }
   printf("-------------- %s --------------\n", assaillant->name);
@@ -116,12 +119,16 @@ int attack(entity_s *assaillant, entity_s *target)
     if (target->action==DEFENSE) {
         printf("%s DEFENDS!\n",target->name);
       }
-    printf("%s use %s and inflict %d life points to %s.\n",assaillant->name,assaillant->attack,assaillant->dmg/target->def,target->name);
+    printf("%s use %s and inflict %d life points to %s.\n", assaillant->name, assaillant->attack, assaillant->dmg/target->def, target->name);
     target->hp-=assaillant->dmg/target->def;
   }
   else if (assaillant->action==DEFENSE) {
     assaillant->def+=4;
     printf("%s DEFENDS!\n",assaillant->name);
+  }
+  else if (assaillant->action==CAST) {
+    printf("%s cast %s on %s\n", assaillant->name, assaillant->spell->name, target->name);
+    spell(assaillant, target);
   }
   else if(assaillant->action==ANTIDOTE) {
     printf("%s use ANTIDOTE\n",assaillant->name);
@@ -133,6 +140,14 @@ int attack(entity_s *assaillant, entity_s *target)
   if(target->hp<=0) {
     target->status=0;
   }
+}
+
+//Resolution du spell des alliés vers une entitée
+void spell(entity_s *caster, entity_s *target) {
+ target->def+=caster->spell->def;
+ target->hp+=caster->spell->dmg;
+ target->hp+=caster->spell->hp;
+ if (caster->spell->status_modif!=(-1)){target->status=caster->spell->status_modif; }
 }
 
 //Resolutions spéciales en fonction du statut de l'entitée
@@ -159,7 +174,7 @@ int victory_check(team_s *allies, team_s *opponents)
 {
   int v_check=0;
   for (int i = 0; i < 4; i++) {
-    if (allies->members[i]->status==0) {
+    if (allies->members[i]->status==DEAD) {
       v_check++;
     }
   }
@@ -169,7 +184,7 @@ int victory_check(team_s *allies, team_s *opponents)
   }
   v_check=0;
   for (int i = 0; i < 4; i++) {
-    if (opponents->members[i]->status==0) {
+    if (opponents->members[i]->status==DEAD) {
       v_check++;
     }
   }
@@ -184,12 +199,12 @@ int victory_check(team_s *allies, team_s *opponents)
 // MAIN
 int main() {
   srand(time(NULL));
-  spell_s poison={0, 0, 0, 5, 2};
-  spell_s soin={0, 0, 5, 3, -1};
-  spell_s strike={0, 2, 0, 3, -1};
-  spell_s shield={2, 0, 0, 3, -1};
-  entity_s player= {"Player","SWORD SLASH",30, 5, 30, 5, 12, 0, 0, 1, &poison, 1, 1};
-  entity_s healer= {"Healer","HEALING",20, 5, 20, 5, 0, 0, 0, 1, &soin, 1, 1};
+  spell_s poison={0, 0, 0, 20, 2, "Poison"};
+  spell_s soin={0, 0, 5, 3, -1, "Soin"};
+  spell_s strike={0, 2, 0, 3, -1, "Strike"};
+  spell_s shield={2, 0, 0, 3, -1, "Shield"};
+  entity_s player= {"Player","SWORD SLASH",100, 100, 25, 25, 20, 0, 0, 1, &poison, 1, 1};
+  entity_s healer= {"Healer","HEALING",50, 50, 100, 100, 0, 0, 0, 1, &soin, 1, 1};
   entity_s warrior={"Warrior","STAGGERING STRIKE",20, 5, 20, 5, 5, 0, 0, 1, &strike, 1, 1};
   entity_s templar={"Templar","SHIELD WALL",25, 5, 25, 5, 3, 0, 0, 1, &shield, 1, 1};
   entity_s chief=  {"Chief Superior Orc Smallthumbdunnowhich","DEADLY PUNCH", 20, 5, 20, 5, 5, 0, 0, 1, &poison, 1, 1};
